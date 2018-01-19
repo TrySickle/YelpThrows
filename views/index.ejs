@@ -1,0 +1,36 @@
+<% include partials/header %>
+
+<div class="container">
+    <header class="jumbotron">
+        <div class="container">
+            <h1>Welcome to YelpThrows!</h1>
+            <p>View some sick spins</p>
+            <p>
+                <a class="btn btn-primary btn-lg" href="/throws/new">Add New Throw</a>
+            </p>
+        </div>
+    </header>
+
+    <div class="row text-center" style="display:flex; flex-wrap: wrap;">
+        <div class="col-sm-12">
+            <h3>Our most popular Throws</h3>
+        </div>
+        <% throws.forEach(function(yo) { %>
+        <div class="col-md-3 col-sm-6">
+            <div class="thumbnail">
+                <img src="<%= yo.image %>">
+                <div class="caption">
+                    <h4><%= yo.name %></h4>
+                </div>
+                <p>
+                    <a class="btn btn-primary" href="/throws/<%= yo._id %>">More Info</a>
+                </p>
+            </div>
+        </div>
+    <% }); %>
+    </div>    
+
+    
+</div>
+
+<% include partials/footer %>
