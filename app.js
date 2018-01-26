@@ -1,21 +1,14 @@
 var express     = require("express"),
     app         = express(),
     bodyParser  = require("body-parser"),
-    mongoose    = require("mongoose");
+    mongoose    = require("mongoose"),
+    Throw       = require("./models/throw");
 
 // mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost/yelp_throws");
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
-// schema setup
-var throwSchema = new mongoose.Schema({
-    name: String,
-    image: String,
-    description: String
-});
-
-var Throw = mongoose.model("Throw", throwSchema);
 
 // image urls
 // http://onedropyoyos.com/images/gallery/Thunderstorm-1.jpg
