@@ -2,37 +2,18 @@ var express     = require("express"),
     app         = express(),
     bodyParser  = require("body-parser"),
     mongoose    = require("mongoose"),
-    Throw       = require("./models/throw");
+    Throw       = require("./models/throw"),
+    Comment     = require("./models/comment"),
+    seedDB      = require("./seeds");
 
-// mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost/yelp_throws");
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
-
-
-// image urls
-// http://onedropyoyos.com/images/gallery/Thunderstorm-1.jpg
-// http://onedropyoyos.com/images/gallery/dang2_solid.jpg
-// http://onedropyoyos.com/images/gallery/cabal_4.jpg
-// http://onedropyoyos.com/images/gallery/kuntosh_5000qv_1.jpg
-
-// Throw.create(
-//     {
-//         name: "Parlay", 
-//         image: "http://onedropyoyos.com/images/gallery/Thunderstorm-1.jpg",
-//         description: "A throwback high walled, undersized, narrow yoyo."
-//     }, function(err, yoyo) {
-//         if (err) {
-//             console.log(err);
-//         } else {
-//             console.log("New yoyo");
-//             console.log(yoyo);
-//         }
-//     });
-
+    
+seedDB();
 // ROUTES
 app.get("/", function(req, res) {
-    res.render("home");
+    res.render("landing");
 });
 
 // INDEX - shows all throws
@@ -41,14 +22,14 @@ app.get("/throws", function(req, res) {
         if (err) {
             console.log(err);
         } else {
-            res.render("index", {throws: throws});
+            res.render("throws/index", {throws: throws});
         }
     });
 });
 
 // NEW - form to create new throw
 app.get("/throws/new", function(req, res) {
-    res.render("new");
+    res.render("throws/new");
 });
 
 
@@ -72,11 +53,44 @@ app.post("/throws", function(req, res) {
 
 // SHOW - shows more info about one throw
 app.get("/throws/:id", function(req, res) {
-    Throw.findById(req.params.id, function(err, yoyo) {
+    Throw.findById(req.params.id).populate("comments").exec(function(err, yoyo) {
         if (err) {
             console.log(err);
         } else {
-            res.render("show", {yoyo: yoyo});
+            res.render("throws/show", {yoyo: yoyo});
+        }
+    });
+});
+
+// COMMENTS ROUTES
+// ====================
+app.get("/throws/:id/comments/new", function(req, res) {
+    Throw.findById(req.params.id, function (err, yoyo) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.render("comments/new", { yoyo: yoyo });
+        }
+    });
+});
+
+app.post("/throws/:id/comments", function(req, res) {
+    Throw.findById(req.params.id, function(err, yoyo) {
+        if (err) {
+            console.log(err);
+            res.redirect("/throws");
+        } else {
+            Comment.create(req.body.comment, function(err, comment) {
+                if (err) {
+                    console.log(err);
+                    res.redirect("/throws");
+                } else {
+                    yoyo.comments.push(comment._id);
+                    yoyo.save();
+                    console.log("comment added");
+                    res.redirect("/throws/" + yoyo._id);
+                }
+            });
         }
     });
 });
